@@ -5,11 +5,15 @@
 	<title>Ver 0.1.0</title>
 	<style>
 	html {
-  	// ビヨヨン効果を無効化する
+		  height  : 100%;
+  	overflow: 'hidden';
   	overscroll-behavior: none;
 	}
 		body {
+			height  : 100%;
+    overflow: auto;
 			margin: 0;
+			overscroll-behavior-y: none;
 		}
 
 		canvas {
@@ -19,7 +23,9 @@
 </head>
 
 <body>
+	<script src="js/jquery-3.5.1.min.js"></script>
 	<script src="js/three.js"></script>
+
 	<script src="js/FBXLoader.js"></script>
 	<script src="js/OBJLoader.js"></script>
 	<script src="js/MTLLoader.js"></script>
@@ -50,11 +56,11 @@
 		cube.position.y = 10;
 		scene.add(cube);
 
-		var ambientLight = new THREE.AmbientLight(0xcccccc, 0.55);
+		var ambientLight = new THREE.AmbientLight(0xfffff0, 1.0);
 		scene.add(ambientLight);
 
-		const upperLight = new THREE.DirectionalLight(0xffffff, 0.5);
-		upperLight.target = cube;
+		const upperLight = new THREE.DirectionalLight(0xffffff, 0.3);
+		//upperLight.target = cube;
 		scene.add(upperLight);
 
 		//var axes = new THREE.AxisHelper(25);
@@ -209,19 +215,20 @@
 
 			var loader = new THREE.TextureLoader();
 
-			loader.load("image/concrete.png", function(texture) {
+			loader.load("image/lighted-wall.jpg", function(texture) {
 				apply(texture); // mesh作成
 			});
 
 			function apply(texture) {
 				var geometry = new THREE.PlaneGeometry();
 				var material = new THREE.MeshPhongMaterial({
-					color: 0xeeeeee
+					map: texture
 				});
 				var plane = new THREE.Mesh(geometry, material);
 
 				plane.position.copy(position);
-				plane.scale.y = 2;
+				plane.position.y = 0.75;
+				plane.scale.y = 1.5;
 				plane.rotation.x = rotation.x;
 				plane.rotation.y = rotation.y;
 				plane.rotation.z = rotation.z;
@@ -243,7 +250,7 @@
 				var container = new THREE.Object3D();
 
 				var geometry = new THREE.PlaneGeometry();
-				var material = new THREE.MeshPhongMaterial({
+				var material = new THREE.MeshBasicMaterial({
 					map: texture
 				});
 				var plane = new THREE.Mesh(geometry, material);
@@ -287,41 +294,6 @@
 				//targetList.push(plane);
 			}
 		}
-
-		/*
-				//マウスが押された時
-		 window.onmousedown = function (ev){
-		    if (ev.target == renderer.domElement) {
-
-		        //マウス座標2D変換
-		        var rect = ev.target.getBoundingClientRect();
-		        mouse.x =  ev.clientX - rect.left;
-		        mouse.y =  ev.clientY - rect.top;//マウス座標3D変換 width（横）やheight（縦）は画面サイズ
-						mouse.x = (mouse.x / width) * 2 - 1;
-		        mouse.y = -(mouse.y / height) * 2 + 1;
-
-		        // マウスベクトル
-		        var vector = new THREE.Vector3( mouse.x, mouse.y ,1);
-
-		       // vector はスクリーン座標系なので, オブジェクトの座標系に変換
-		        projector.unprojectVector( vector, camera );
-
-		        // 始点, 向きベクトルを渡してレイを作成
-		        var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-
-		         // クリック判定
-		        var obj = ray.intersectObjects( targetList );
-
-		         // クリックしていたら、alertを表示
-		        if ( obj.length > 0 ){
-
-		          alert("click!!")
-
-		       }else{
-						 alert("no!!")
-					 }
-		 	 	}
-			};*/
 
 		const canvas = document.getElementsByTagName("canvas")[0];
 		// マウス座標管理用のベクトルを作成
@@ -419,6 +391,20 @@
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+//$(window).on('touchmove.noScroll', function(e) {
+    //e.preventDefault();
+		//alert("no scroll");
+//});
+
+var preventScroll = function( event ){
+	event.preventDefault();
+}
+
+// スクロール停止の処理
+window.addEventListener( 'touchmove' , preventScroll , { passive: false } );
+canvas.addEventListener( 'pointermove.noScroll' , preventScroll , { passive: false } );
+
 	</script>
 </body>
 
