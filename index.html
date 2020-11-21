@@ -323,9 +323,9 @@
 		// マウス座標管理用のベクトルを作成
 		//const mouse = new THREE.Vector2();
 		// マウスイベントを登録
-		canvas.addEventListener('mouseup', handleMouseUp);
-		canvas.addEventListener('mousedown', handleMouseDown);
-		canvas.addEventListener('mousemove', handleMouseMove);
+		canvas.addEventListener('pointerup', handleMouseUp);
+		canvas.addEventListener('pointerdown', handleMouseDown);
+		canvas.addEventListener('pointermove', handleMouseMove);
 
 		function getMouseFromEvent(event) {
 			const mouse = new THREE.Vector2();
