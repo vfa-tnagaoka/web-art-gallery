@@ -56,10 +56,10 @@
 		cube.position.y = 10;
 		scene.add(cube);
 
-		var ambientLight = new THREE.AmbientLight(0xfffff0, 1.0);
+		var ambientLight = new THREE.AmbientLight(0xfffff0, 1.1);
 		scene.add(ambientLight);
 
-		const upperLight = new THREE.DirectionalLight(0xffffff, 0.3);
+		const upperLight = new THREE.DirectionalLight(0xffffff, 0.5);
 		//upperLight.target = cube;
 		scene.add(upperLight);
 
@@ -68,7 +68,7 @@
 
 		//camera.position.x = -1;
 		//camera.position.z = 1;
-		camera.position.y = 0.5;
+		camera.position.y = 0.35;
 		//camera.lookAt(new THREE.Vector3(0, 0, -10));
 
 		const animate = function() {
@@ -83,24 +83,24 @@
 		animate();
 
 		for (var i = -10; i <= 10; i++) {
-			if(i % 2 == 0){
-				createPicture(new THREE.Vector3(+1.0, 0.5, -i),  new THREE.Vector3(0, Math.PI / -2, 0));
-				createPicture(new THREE.Vector3(-1.0, 0.5, -i),  new THREE.Vector3(0, Math.PI / +2, 0));
-			}
+			//if(i % 2 == 0){
+				createPicture(new THREE.Vector3(+1.0, 0.35, -i),  new THREE.Vector3(0, Math.PI / -2, 0));
+				createPicture(new THREE.Vector3(-1.0, 0.35, -i),  new THREE.Vector3(0, Math.PI / +2, 0));
+			//}
 
 			createPlane(new THREE.Vector3(+0.5, 0, -i));
 			createPlane(new THREE.Vector3(-0.5, 0, -i));
-			createCeiling(new THREE.Vector3(+0.5, 1.5, -i), i % 2 == 0);
-			createCeiling(new THREE.Vector3(-0.5, 1.5, -i), i % 2 == 0);
-			createWall(new THREE.Vector3(+1.0, 1, -i), new THREE.Vector3(0, Math.PI / -2, 0));
-			createWall(new THREE.Vector3(-1.0, 1, -i), new THREE.Vector3(0, Math.PI / +2, 0));
+			createCeiling(new THREE.Vector3(+0.5, 1.0, -i), i % 2 == 0);
+			createCeiling(new THREE.Vector3(-0.5, 1.0, -i), i % 2 == 0);
+			createWall(new THREE.Vector3(+1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / -2, 0), true);
+			createWall(new THREE.Vector3(-1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / +2, 0), true);
 		}
 
-		createWall(new THREE.Vector3(+0.5, 1, -10.5), new THREE.Vector3(0, 0, 0));
-		createWall(new THREE.Vector3(-0.5, 1, -10.5), new THREE.Vector3(0, 0, 0));
+		createWall(new THREE.Vector3(+0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
+		createWall(new THREE.Vector3(-0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
 
-		createWall(new THREE.Vector3(+0.5, 1, 10.5), new THREE.Vector3(0, Math.PI, 0));
-		createWall(new THREE.Vector3(-0.5, 1, 10.5), new THREE.Vector3(0, Math.PI, 0));
+		createWall(new THREE.Vector3(+0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
+		createWall(new THREE.Vector3(-0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
 
 		/*
       const loader = new THREE.OBJLoader();
@@ -211,11 +211,11 @@
 		}
 
 
-		function createWall(position, rotation) {
+		function createWall(position, rotation, hasPicture) {
 
 			var loader = new THREE.TextureLoader();
 
-			loader.load("image/lighted-wall.jpg", function(texture) {
+			loader.load((hasPicture) ? "image/lighted-wall.jpg" : "image/gray-wall.jpg", function(texture) {
 				apply(texture); // mesh作成
 			});
 
@@ -227,8 +227,8 @@
 				var plane = new THREE.Mesh(geometry, material);
 
 				plane.position.copy(position);
-				plane.position.y = 0.75;
-				plane.scale.y = 1.5;
+				//plane.position.y = 0.75;
+				//plane.scale.y = 1.5;
 				plane.rotation.x = rotation.x;
 				plane.rotation.y = rotation.y;
 				plane.rotation.z = rotation.z;
@@ -256,20 +256,20 @@
 				var plane = new THREE.Mesh(geometry, material);
 				container.add(plane);
 
-				plane.scale.x = 0.5;
-				plane.scale.y = 0.5;
-				plane.scale.z = 0.5;
-				plane.position.z = 0.051;
+				plane.scale.x = 0.35;
+				plane.scale.y = 0.35;
+				plane.scale.z = 0.35;
+				plane.position.z = 0.021;
 
 				var boxGeometory = new THREE.BoxGeometry();
 				var boxMaterial = new THREE.MeshBasicMaterial({
-					color: 0x888800
+					color: 0x886633
 				});
 				var box = new THREE.Mesh(boxGeometory, boxMaterial);
-				box.scale.x = 0.5;
-				box.scale.y = 0.5;
-				box.scale.z = 0.05;
-				box.position.z = 0.025;
+				box.scale.x = 0.35;
+				box.scale.y = 0.35;
+				box.scale.z = 0.02;
+				box.position.z = 0.01;
 				container.add(box);
 
 				container.position.copy(position);
