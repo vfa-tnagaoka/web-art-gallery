@@ -187,7 +187,7 @@
 				plane.position.copy(position);
 				scene.add(plane);
 
-
+				/*
 				if (light) {
 					var pointLight = new THREE.PointLight(0xFFFFFF, 0.15, 30, 2.0);
 					pointLight.position.x = position.x;
@@ -195,6 +195,7 @@
 					pointLight.position.y = 1.4;
 					scene.add(pointLight);
 				}
+				*/
 
 			}
 		}
@@ -250,8 +251,8 @@
 				plane.position.z = 0.051;
 
 				var boxGeometory = new THREE.BoxGeometry();
-				var boxMaterial = new THREE.MeshPhongMaterial({
-					color: 0x888888
+				var boxMaterial = new THREE.MeshBasicMaterial({
+					color: 0x888800
 				});
 				var box = new THREE.Mesh(boxGeometory, boxMaterial);
 				box.scale.x = 0.5;
@@ -267,13 +268,14 @@
 
 				scene.add(container);
 
-
+				/*
 				var spotLight = new THREE.SpotLight(0xFFFFFF, 0.2, 30, Math.PI / 4, 1, 0.5);
 				spotLight.position.x = position.x/2;
 				spotLight.position.z = position.z;
 				spotLight.position.y = 1.2;
 				spotLight.target = container;
 				scene.add(spotLight);
+				*/
 
 				//const lightHelper = new THREE.SpotLightHelper(spotLight);
 				//scene.add(lightHelper);
