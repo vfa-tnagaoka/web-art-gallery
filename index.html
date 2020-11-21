@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>My first three.js app</title>
+	<style>
+		body {
+			margin: 0;
+		}
+
+		canvas {
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="js/three.js"></script>
+	<script src="js/FBXLoader.js"></script>
+	<script src="js/OBJLoader.js"></script>
+	<script src="js/MTLLoader.js"></script>
+	<script>
+		//var mouse = { x: 0, y: 0 };
+		//var targetList = [];
+
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+
+
+		//const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.1 );
+		//scene.add( directionalLight );
+
+
+
+
+		const renderer = new THREE.WebGLRenderer();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		document.body.appendChild(renderer.domElement);
+
+		const geometry = new THREE.BoxGeometry();
+		const material = new THREE.MeshPhongMaterial({
+			color: 0x00ff00
+		});
+		const cube = new THREE.Mesh(geometry, material);
+		cube.position.y = 10;
+		scene.add(cube);
+
+		var ambientLight = new THREE.AmbientLight(0xcccccc, 0.55);
+		scene.add(ambientLight);
+
+		const upperLight = new THREE.DirectionalLight(0xffffff, 0.5);
+		upperLight.target = cube;
+		scene.add(upperLight);
+
+		//var axes = new THREE.AxisHelper(25);
+		//scene.add(axes);
+
+		//camera.position.x = -1;
+		//camera.position.z = 1;
+		camera.position.y = 0.5;
+		//camera.lookAt(new THREE.Vector3(0, 0, -10));
+
+		const animate = function() {
+			requestAnimationFrame(animate);
+
+			cube.rotation.x += 0.01;
+			cube.rotation.y += 0.01;
+
+			renderer.render(scene, camera);
+		};
+
+		animate();
+
+		for (var i = -10; i <= 10; i++) {
+			if(i % 2 == 0){
+				createPicture(new THREE.Vector3(+1.0, 0.5, -i),  new THREE.Vector3(0, Math.PI / -2, 0));
+				createPicture(new THREE.Vector3(-1.0, 0.5, -i),  new THREE.Vector3(0, Math.PI / +2, 0));
+			}
+
+			createPlane(new THREE.Vector3(+0.5, 0, -i));
+			createPlane(new THREE.Vector3(-0.5, 0, -i));
+			createCeiling(new THREE.Vector3(+0.5, 1.5, -i), i % 2 == 0);
+			createCeiling(new THREE.Vector3(-0.5, 1.5, -i), i % 2 == 0);
+			createWall(new THREE.Vector3(+1.0, 1, -i), new THREE.Vector3(0, Math.PI / -2, 0));
+			createWall(new THREE.Vector3(-1.0, 1, -i), new THREE.Vector3(0, Math.PI / +2, 0));
+		}
+
+		createWall(new THREE.Vector3(+0.5, 1, -10.5), new THREE.Vector3(0, 0, 0));
+		createWall(new THREE.Vector3(-0.5, 1, -10.5), new THREE.Vector3(0, 0, 0));
+
+		createWall(new THREE.Vector3(+0.5, 1, 10.5), new THREE.Vector3(0, Math.PI, 0));
+		createWall(new THREE.Vector3(-0.5, 1, 10.5), new THREE.Vector3(0, Math.PI, 0));
+
+		/*
+      const loader = new THREE.OBJLoader();
+      // テクスチャーのパスを指定
+      //loader.setPath('models/3ds/portalgun/textures/');
+      // 3dsファイルのパスを指定
+      loader.load('obj/interior.obj',  (object) => {
+        // 読み込み後に3D空間に追加
+        scene.add(object);
+      });
+			*/
+
+		/*
+			var mtlLoader = new THREE.MTLLoader();
+    	mtlLoader.setPath( './obj/' );              // this/is/obj/path/
+    	mtlLoader.load( 'cat/cat.mtl', function( materials ) {
+      	materials.preload();
+      	var objLoader = new THREE.OBJLoader();
+      	objLoader.setMaterials( materials );
+      	objLoader.setPath( './obj/' );            // this/is/obj/path/
+      	objLoader.load( 'cat/cat.obj', function ( object ) {
+        objmodel = object.clone();
+        objmodel.scale.set(10, 10, 10);      // 縮尺の初期化
+        objmodel.rotation.set(0, 0, 0);         // 角度の初期化
+        objmodel.position.set(0, 0, 0);         // 位置の初期化
+
+    // objをObject3Dで包む
+        obj = new THREE.Object3D();
+        obj.add(objmodel);
+
+        scene.add(obj);                         // sceneに追加
+      }, onProgress, onError );
+    });
+		*/
+
+		function onProgress() {
+
+		}
+
+		function onError() {
+
+		}
+
+		var grounds = [];
+
+		function createPlane(position, light) {
+
+			var loader = new THREE.TextureLoader();
+
+			loader.load("image/wood.jpg", function(texture) {
+				apply(texture); // mesh作成
+			});
+
+			function apply(texture) {
+				var geometry = new THREE.PlaneGeometry();
+				var material = new THREE.MeshPhongMaterial({
+					map: texture
+				});
+				var plane = new THREE.Mesh(geometry, material);
+
+				plane.scale.x = 1;
+				plane.scale.y = 1;
+				plane.rotation.x = Math.PI / -2;
+				//plane.rotation.z = Math.PI / -2;
+				//var position = new THREE.Vector3(1, 0, 0);
+				plane.position.copy(position);
+				scene.add(plane);
+
+				grounds.push(plane);
+
+			}
+		}
+
+		function createCeiling(position, light) {
+
+			var loader = new THREE.TextureLoader();
+
+			loader.load("image/concrete.png", function(texture) {
+				apply(texture); // mesh作成
+			});
+
+			function apply(texture) {
+				var geometry = new THREE.PlaneGeometry();
+				var material = new THREE.MeshPhongMaterial({
+					map: texture
+				});
+				var plane = new THREE.Mesh(geometry, material);
+
+				plane.scale.x = 1;
+				plane.scale.y = 1;
+				plane.rotation.x = Math.PI / 2;
+				//plane.rotation.z = Math.PI / -2;
+				//var position = new THREE.Vector3(1, 0, 0);
+				plane.position.copy(position);
+				scene.add(plane);
+
+
+				if (light) {
+					var pointLight = new THREE.PointLight(0xFFFFFF, 0.15, 30, 2.0);
+					pointLight.position.x = position.x;
+					pointLight.position.z = position.z;
+					pointLight.position.y = 1.4;
+					scene.add(pointLight);
+				}
+
+			}
+		}
+
+
+		function createWall(position, rotation) {
+
+			var loader = new THREE.TextureLoader();
+
+			loader.load("image/concrete.png", function(texture) {
+				apply(texture); // mesh作成
+			});
+
+			function apply(texture) {
+				var geometry = new THREE.PlaneGeometry();
+				var material = new THREE.MeshPhongMaterial({
+					color: 0xeeeeee
+				});
+				var plane = new THREE.Mesh(geometry, material);
+
+				plane.position.copy(position);
+				plane.scale.y = 2;
+				plane.rotation.x = rotation.x;
+				plane.rotation.y = rotation.y;
+				plane.rotation.z = rotation.z;
+				scene.add(plane);
+
+				//targetList.push(plane);
+			}
+		}
+
+		function createPicture(position, rotation) {
+
+			var loader = new THREE.TextureLoader();
+
+			loader.load("image/art" + getRandomInt(0, 5) +  ".jpg", function(texture) {
+				apply(texture); // mesh作成
+			});
+
+			function apply(texture) {
+				var container = new THREE.Object3D();
+
+				var geometry = new THREE.PlaneGeometry();
+				var material = new THREE.MeshPhongMaterial({
+					map: texture
+				});
+				var plane = new THREE.Mesh(geometry, material);
+				container.add(plane);
+
+				plane.scale.x = 0.5;
+				plane.scale.y = 0.5;
+				plane.scale.z = 0.5;
+				plane.position.z = 0.051;
+
+				var boxGeometory = new THREE.BoxGeometry();
+				var boxMaterial = new THREE.MeshPhongMaterial({
+					color: 0x888888
+				});
+				var box = new THREE.Mesh(boxGeometory, boxMaterial);
+				box.scale.x = 0.5;
+				box.scale.y = 0.5;
+				box.scale.z = 0.05;
+				box.position.z = 0.025;
+				container.add(box);
+
+				container.position.copy(position);
+				container.rotation.x = rotation.x;
+				container.rotation.y = rotation.y;
+				container.rotation.z = rotation.z;
+
+				scene.add(container);
+
+
+				var spotLight = new THREE.SpotLight(0xFFFFFF, 0.2, 30, Math.PI / 4, 1, 0.5);
+				spotLight.position.x = position.x/2;
+				spotLight.position.z = position.z;
+				spotLight.position.y = 1.2;
+				spotLight.target = container;
+				scene.add(spotLight);
+
+				//const lightHelper = new THREE.SpotLightHelper(spotLight);
+				//scene.add(lightHelper);
+
+				//targetList.push(plane);
+			}
+		}
+
+		/*
+				//マウスが押された時
+		 window.onmousedown = function (ev){
+		    if (ev.target == renderer.domElement) {
+
+		        //マウス座標2D変換
+		        var rect = ev.target.getBoundingClientRect();
+		        mouse.x =  ev.clientX - rect.left;
+		        mouse.y =  ev.clientY - rect.top;//マウス座標3D変換 width（横）やheight（縦）は画面サイズ
+						mouse.x = (mouse.x / width) * 2 - 1;
+		        mouse.y = -(mouse.y / height) * 2 + 1;
+
+		        // マウスベクトル
+		        var vector = new THREE.Vector3( mouse.x, mouse.y ,1);
+
+		       // vector はスクリーン座標系なので, オブジェクトの座標系に変換
+		        projector.unprojectVector( vector, camera );
+
+		        // 始点, 向きベクトルを渡してレイを作成
+		        var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+		         // クリック判定
+		        var obj = ray.intersectObjects( targetList );
+
+		         // クリックしていたら、alertを表示
+		        if ( obj.length > 0 ){
+
+		          alert("click!!")
+
+		       }else{
+						 alert("no!!")
+					 }
+		 	 	}
+			};*/
+
+		const canvas = document.getElementsByTagName("canvas")[0];
+		// マウス座標管理用のベクトルを作成
+		//const mouse = new THREE.Vector2();
+		// マウスイベントを登録
+		canvas.addEventListener('mouseup', handleMouseUp);
+		canvas.addEventListener('mousedown', handleMouseDown);
+		canvas.addEventListener('mousemove', handleMouseMove);
+
+		function getMouseFromEvent(event) {
+			const mouse = new THREE.Vector2();
+			const element = event.currentTarget;
+			// canvas要素上のXY座標
+			const x = event.clientX - element.offsetLeft;
+			const y = event.clientY - element.offsetTop;
+			// canvas要素の幅・高さ
+			const w = element.offsetWidth;
+			const h = element.offsetHeight;
+
+			// -1〜+1の範囲で現在のマウス座標を登録する
+			mouse.x = (x / w) * 2 - 1;
+			mouse.y = -(y / h) * 2 + 1;
+
+			return mouse;
+		}
+
+		var lastMouse;
+		var down;
+		var move;
+		// マウスを動かしたときのイベント
+		function handleMouseDown(event) {
+			down = true;
+			move = false;
+			var mouse = getMouseFromEvent(event);
+			lastMouse = mouse;
+		}
+
+		function handleMouseMove(event) {
+			if (down) {
+				var mouse = getMouseFromEvent(event);
+				var d = mouse.x - lastMouse.x;
+
+				camera.rotation.y += d;
+				lastMouse = mouse;
+				//down = false;
+				move = true;
+
+			}
+		}
+
+		function handleMouseUp(event) {
+
+			if (move == false) {
+
+				var mouse = getMouseFromEvent(event);
+
+				const raycaster = new THREE.Raycaster();
+				raycaster.setFromCamera(mouse, camera);
+				//const intersects = raycaster.intersectObjects(scene.children);
+				const intersects = raycaster.intersectObjects(grounds);
+				if (intersects.length > 0) {
+					// ぶつかったオブジェクトに対してなんかする
+					//alert(intersects[0]);
+
+					var intercect = intersects[0].object;
+					//alert(intercect);
+
+					var ip = intercect.position;
+					var cp = camera.position;
+
+					var rate = 0;
+
+					var moveToThere = function() {
+						rate += 0.01;
+						if (rate < 1) {
+							requestAnimationFrame(moveToThere);
+						}
+						camera.position.x = ip.x * rate + cp.x * (1 - rate);
+						camera.position.z = ip.z * rate + cp.z * (1 - rate);
+
+						renderer.render(scene, camera);
+					};
+
+					moveToThere();
+				}
+			}
+
+			down = false;
+			move = false;
+			//alert("aaa");
+		}
+
+		function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+	</script>
+</body>
+
+</html>
