@@ -144,7 +144,7 @@
 
 		}
 
-		var grounds = [];
+		//var grounds = [];
 
 		function createPlane(position, light) {
 
@@ -169,7 +169,7 @@
 				plane.position.copy(position);
 				scene.add(plane);
 
-				grounds.push(plane);
+				//grounds.push(plane);
 
 			}
 		}
@@ -238,6 +238,8 @@
 			}
 		}
 
+		var pictures = [];
+
 		function createPicture(position, rotation) {
 
 			var loader = new THREE.TextureLoader();
@@ -260,6 +262,8 @@
 				plane.scale.y = 0.35;
 				plane.scale.z = 0.35;
 				plane.position.z = 0.021;
+
+				pictures.push(plane);
 
 				var boxGeometory = new THREE.BoxGeometry();
 				var boxMaterial = new THREE.MeshBasicMaterial({
@@ -346,14 +350,14 @@
 
 		function handleMouseUp(event) {
 
-			if (move == false) {
+			//if (move == false) {
 
 				var mouse = getMouseFromEvent(event);
 
 				const raycaster = new THREE.Raycaster();
 				raycaster.setFromCamera(mouse, camera);
 				//const intersects = raycaster.intersectObjects(scene.children);
-				const intersects = raycaster.intersectObjects(grounds);
+				const intersects = raycaster.intersectObjects(pictures);
 				if (intersects.length > 0) {
 					// ぶつかったオブジェクトに対してなんかする
 					//alert(intersects[0]);
@@ -361,7 +365,18 @@
 					var intercect = intersects[0].object;
 					//alert(intercect);
 
-					var ip = intercect.position;
+					let handVec = new THREE.Vector3()
+
+					var ip = intercect.getWorldPosition(handVec)
+					var left = (ip.x > 0);
+
+					ip.x = left ? 0.65 : -0.65;
+
+					var cy = camera.rotation.y;
+					var iy = (left ? -1 : 1 ) * Math.PI / 2;
+
+
+					//var ip = intercect.position;
 					var cp = camera.position;
 
 					var rate = 0;
@@ -373,13 +388,14 @@
 						}
 						camera.position.x = ip.x * rate + cp.x * (1 - rate);
 						camera.position.z = ip.z * rate + cp.z * (1 - rate);
+						//camera.rotation.y = iy * rate + cy  * (1 - rate);
 
 						renderer.render(scene, camera);
 					};
 
 					moveToThere();
 				}
-			}
+			//}
 
 			down = false;
 			move = false;
