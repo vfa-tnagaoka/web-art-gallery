@@ -4,14 +4,15 @@
 <head>
 	<title>Ver 0.1.0</title>
 	<style>
-	html {
-		  height  : 100%;
-  	overflow: 'hidden';
-  	overscroll-behavior: none;
-	}
+		html {
+			height: 100%;
+			overflow: 'hidden';
+			overscroll-behavior: none;
+		}
+
 		body {
-			height  : 100%;
-    overflow: auto;
+			height: 100%;
+			overflow: auto;
 			margin: 0;
 			overscroll-behavior-y: none;
 		}
@@ -86,8 +87,8 @@
 
 		for (var i = -10; i <= 10; i++) {
 			//if(i % 2 == 0){
-				createPicture(new THREE.Vector3(+1.0, 0.35, -i),  new THREE.Vector3(0, Math.PI / -2, 0));
-				createPicture(new THREE.Vector3(-1.0, 0.35, -i),  new THREE.Vector3(0, Math.PI / +2, 0));
+			createPicture(new THREE.Vector3(+1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / -2, 0));
+			createPicture(new THREE.Vector3(-1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / +2, 0));
 			//}
 
 			createPlane(new THREE.Vector3(+0.5, 0, -i));
@@ -246,7 +247,7 @@
 
 			var loader = new THREE.TextureLoader();
 
-			loader.load("image/art" + getRandomInt(0, 5) +  ".jpg", function(texture) {
+			loader.load("image/art" + getRandomInt(0, 5) + ".jpg", function(texture) {
 				apply(texture); // mesh作成
 			});
 
@@ -356,37 +357,37 @@
 
 			//if (move == false) {
 
-				var mouse = getMouseFromEvent(event);
+			var mouse = getMouseFromEvent(event);
 
-				const raycaster = new THREE.Raycaster();
-				raycaster.setFromCamera(mouse, camera);
-				//const intersects = raycaster.intersectObjects(scene.children);
-				const intersects = raycaster.intersectObjects(pictures);
-				if (intersects.length > 0) {
-					// ぶつかったオブジェクトに対してなんかする
-					//alert(intersects[0]);
+			const raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera(mouse, camera);
+			//const intersects = raycaster.intersectObjects(scene.children);
+			const intersects = raycaster.intersectObjects(pictures);
+			if (intersects.length > 0) {
+				// ぶつかったオブジェクトに対してなんかする
+				//alert(intersects[0]);
 
-					var intersect = intersects[0].object;
+				var intersect = intersects[0].object;
 
 
-					if(intersect == lastIntersect)
-						return;
+				if (intersect == lastIntersect)
+					return;
 
-						lastIntersect = intersect;
+				lastIntersect = intersect;
 
-					//alert(intercect);
+				//alert(intercect);
 
-					let handVec = new THREE.Vector3()
+				let handVec = new THREE.Vector3()
 
-					var ip = intersect.getWorldPosition(handVec)
-					var left = (ip.x > 0);
+				var ip = intersect.getWorldPosition(handVec)
+				var left = (ip.x > 0);
 
-					ip.x = left ? 0.5 : -0.5;
+				ip.x = left ? 0.5 : -0.5;
 
-					var cy = camera.rotation.y;
-					var iy = (left ? -1 : 1 ) * Math.PI / 2;
+				var cy = camera.rotation.y;
+				var iy = (left ? -1 : 1) * Math.PI / 2;
 
-          /*
+				/*
 					if(cy > Math.PI* 2){
 						cy -= Math.PI * 2;
 					}
@@ -395,39 +396,61 @@
 					}
 					*/
 
-					console.log(cy + " " + iy );
+				iy = FindShort(cy, iy);
 
-					//var ip = intercect.position;
-					var cp = camera.position;
+				console.log(cy + " " + iy);
 
-					var rate = 0;
+				//var ip = intercect.position;
+				var cp = camera.position;
 
-					gsap.to(camera.position, {duration: 1, x: ip.x, z: ip.z});
-					gsap.to(camera, {
-						duration: 1,
-						rotation: { y:iy + "_short", useRadians:true}
-					});
-					//onUpdate: () => console.log(item.rotation.x, item.rotation.y, item.rotation.z)
-					/*
-					var moveToThere = function() {
-						rate += 0.01;
+				var rate = 0;
 
-						var rrate = rate * 2;
-						if(rrate > 1) rrate = 1;
+				var dummy = {
+					rotation: {
+						y: cy
+					}
+				};
 
-						if (rate < 1) {
-							requestAnimationFrame(moveToThere);
-						}
-						camera.position.x = ip.x * rate + cp.x * (1 - rate);
-						camera.position.z = ip.z * rate + cp.z * (1 - rate);
-						camera.rotation.y = iy * rrate + cy  * (1 - rrate);
+				gsap.to(camera.position, {
+					duration: 1,
+					x: ip.x,
+					z: ip.z
+				});
+				gsap.to(camera.rotation, {
+					duration: 1,
+					y: iy
+				});
+				/*
+				gsap.to(dummy, {
+					duration: 1,
+					rotation: { y:iy + "_short", useRadians:true},
+					onUpdate: () => {
+						camera.rotation.y = 0;
+						console.log(dummy.rotation.y)
+					}
+				});
+				*/
+				//onUpdate: () => console.log(item.rotation.x, item.rotation.y, item.rotation.z)
+				/*
+				var moveToThere = function() {
+					rate += 0.01;
 
-						renderer.render(scene, camera);
-					};
+					var rrate = rate * 2;
+					if(rrate > 1) rrate = 1;
 
-					moveToThere();
-					*/
-				}
+					if (rate < 1) {
+						requestAnimationFrame(moveToThere);
+					}
+					camera.position.x = ip.x * rate + cp.x * (1 - rate);
+					camera.position.z = ip.z * rate + cp.z * (1 - rate);
+					camera.rotation.y = iy * rrate + cy  * (1 - rrate);
+
+					renderer.render(scene, camera);
+				};
+
+				moveToThere();
+				*/
+			}
 			//}
 
 			down = false;
@@ -436,99 +459,39 @@
 		}
 
 		function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+			min = Math.ceil(min);
+			max = Math.floor(max);
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
 
-//$(window).on('touchmove.noScroll', function(e) {
-    //e.preventDefault();
+		//$(window).on('touchmove.noScroll', function(e) {
+		//e.preventDefault();
 		//alert("no scroll");
-//});
+		//});
 
-var preventScroll = function( event ){
-	event.preventDefault();
-}
+		var preventScroll = function(event) {
+			event.preventDefault();
+		}
 
-// スクロール停止の処理
-window.addEventListener( 'touchmove' , preventScroll , { passive: false } );
-canvas.addEventListener( 'pointermove.noScroll' , preventScroll , { passive: false } );
-
-// DirectionalRotationPlugin start
-gsap.registerPlugin({
-  name: "directionalRotation",
-  init(target, values) {
-    if (typeof(values) !== "object") {
-      values = {rotation:values};
-    }
-    var data = this,
-        cap = values.useRadians ? Math.PI * 2 : 360,
-        min = 1e-6,
-        p, v, start, end, dif, split;
-    data.endValues = {};
-    data.target = target;
-    for (p in values) {
-      if (p !== "useRadians") {
-        end = values[p];
-        split = (end + "").split("_");
-        v = split[0];
-        start = parseFloat(target[p]);
-        end = data.endValues[p] = (typeof(v) === "string" && v.charAt(1) === "=") ? start + parseInt(v.charAt(0) + "1", 10) * Number(v.substr(2)) : +v || 0;
-        dif = end - start;
-        if (split.length) {
-          v = split.join("_");
-          if (~v.indexOf("short")) {
-            dif = dif % cap;
-            if (dif !== dif % (cap / 2)) {
-              dif = (dif < 0) ? dif + cap : dif - cap;
-            }
-          }
-          if (v.indexOf("_cw") !== -1 && dif < 0) {
-            dif = ((dif + cap * 1e10) % cap) - ((dif / cap) | 0) * cap;
-          } else if (v.indexOf("ccw") !== -1 && dif > 0) {
-            dif = ((dif - cap * 1e10) % cap) - ((dif / cap) | 0) * cap;
-          }
-        }
-        if (dif > min || dif < -min) {
-          data.add(target, p, start, start + dif);
-          data._props.push(p);
-        }
-      }
-    }
-  },
-  render(progress, data) {
-    if (progress === 1) {
-      for (let p in data.endValues) {
-        data.target[p] = data.endValues[p];
-      }
-    } else {
-      let pt = data._pt;
-      while (pt) {
-        pt.r(progress, pt.d);
-        pt = pt._next;
-      }
-    }
-  }
-});
-// DirectionalRotationPlugin end.
+		// スクロール停止の処理
+		window.addEventListener('touchmove', preventScroll, {
+			passive: false
+		});
+		canvas.addEventListener('pointermove.noScroll', preventScroll, {
+			passive: false
+		});
 
 
-
-let item = {rotation: {x: 0, y: 0, z: 0}};
-let newRot = {x: -300, y: 20, z: 50};
-console.clear();
-
-gsap.to(item.rotation, {
-  duration: 1,
-  directionalRotation: {
-    x: newRot.x + "_short",
-    y: newRot.y + "_ccw",
-    z: newRot.z + "_cw",
-		useRadians: true
-  },
-  onUpdate: () => console.log(item.rotation.x, item.rotation.y, item.rotation.z)
-})
-
+		function FindShort(start, end) {
+			var cap = Math.PI * 2;
+			var dif = end - start;
+			dif = dif % cap;
+			if (dif !== dif % (cap / 2)) {
+				dif = (dif < 0) ? dif + cap : dif - cap;
+			}
+			var target = start + dif;
+			return target;
+		}
 	</script>
 </body>
 
