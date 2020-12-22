@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Ver 0.1.0</title>
+	<title>Ver 0.2.0</title>
 	<style>
 		html {
 			height: 100%;
@@ -33,128 +33,96 @@
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
 	<script>
-		//var mouse = { x: 0, y: 0 };
-		//var targetList = [];
 
-		const scene = new THREE.Scene();
-		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+		var scene;
+		var camera;
 
+		var pictures = [];
 
+		var lastMouse;
+		var down;
+		var move;
+		var lastIntersect;
 
-		//const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.1 );
-		//scene.add( directionalLight );
+		main();
 
+		function main() {
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+			const renderer = new THREE.WebGLRenderer();
 
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
 
-		const renderer = new THREE.WebGLRenderer();
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		document.body.appendChild(renderer.domElement);
+			const geometry = new THREE.BoxGeometry();
+			const material = new THREE.MeshPhongMaterial({
+				color: 0x00ff00
+			});
 
-		const geometry = new THREE.BoxGeometry();
-		const material = new THREE.MeshPhongMaterial({
-			color: 0x00ff00
-		});
-		const cube = new THREE.Mesh(geometry, material);
-		cube.position.y = 10;
-		scene.add(cube);
+			const cube = new THREE.Mesh(geometry, material);
+			cube.position.y = 10;
+			scene.add(cube);
 
-		var ambientLight = new THREE.AmbientLight(0xfffff0, 1.1);
-		scene.add(ambientLight);
+			var ambientLight = new THREE.AmbientLight(0xfffff0, 1.1);
+			scene.add(ambientLight);
 
-		const upperLight = new THREE.DirectionalLight(0xffffff, 0.5);
-		//upperLight.target = cube;
-		scene.add(upperLight);
+			const upperLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			scene.add(upperLight);
 
-		//var axes = new THREE.AxisHelper(25);
-		//scene.add(axes);
+			camera.position.y = 0.35;
 
-		//camera.position.x = -1;
-		//camera.position.z = 1;
-		camera.position.y = 0.35;
-		//camera.lookAt(new THREE.Vector3(0, 0, -10));
+			for (var i = -10; i <= 10; i++) {
+				createPicture(new THREE.Vector3(+1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / -2, 0));
+				createPicture(new THREE.Vector3(-1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / +2, 0));
+				createPlane(new THREE.Vector3(+0.5, 0, -i));
+				createPlane(new THREE.Vector3(-0.5, 0, -i));
+				createCeiling(new THREE.Vector3(+0.5, 1.0, -i), i % 2 == 0);
+				createCeiling(new THREE.Vector3(-0.5, 1.0, -i), i % 2 == 0);
+				createWall(new THREE.Vector3(+1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / -2, 0), true);
+				createWall(new THREE.Vector3(-1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / +2, 0), true);
+			}
 
-		const animate = function() {
-			requestAnimationFrame(animate);
+			createWall(new THREE.Vector3(+0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
+			createWall(new THREE.Vector3(-0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
 
-			cube.rotation.x += 0.01;
-			cube.rotation.y += 0.01;
+			createWall(new THREE.Vector3(+0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
+			createWall(new THREE.Vector3(-0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
 
-			renderer.render(scene, camera);
-		};
+			const animate = function() {
+				requestAnimationFrame(animate);
 
-		animate();
+				cube.rotation.x += 0.01;
+				cube.rotation.y += 0.01;
 
-		for (var i = -10; i <= 10; i++) {
-			//if(i % 2 == 0){
-			createPicture(new THREE.Vector3(+1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / -2, 0));
-			createPicture(new THREE.Vector3(-1.0, 0.35, -i), new THREE.Vector3(0, Math.PI / +2, 0));
-			//}
+				renderer.render(scene, camera);
+			};
+			animate();
 
-			createPlane(new THREE.Vector3(+0.5, 0, -i));
-			createPlane(new THREE.Vector3(-0.5, 0, -i));
-			createCeiling(new THREE.Vector3(+0.5, 1.0, -i), i % 2 == 0);
-			createCeiling(new THREE.Vector3(-0.5, 1.0, -i), i % 2 == 0);
-			createWall(new THREE.Vector3(+1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / -2, 0), true);
-			createWall(new THREE.Vector3(-1.0, 0.5, -i), new THREE.Vector3(0, Math.PI / +2, 0), true);
+			const canvas = document.getElementsByTagName("canvas")[0];
+
+			canvas.addEventListener('pointerup', handleMouseUp);
+			canvas.addEventListener('pointerdown', handleMouseDown);
+			canvas.addEventListener('pointermove', handleMouseMove);
+
+			var preventScroll = function(event) {
+				event.preventDefault();
+			}
+
+			window.addEventListener('touchmove', preventScroll, {
+				passive: false
+			});
+			canvas.addEventListener('pointermove.noScroll', preventScroll, {
+				passive: false
+			});
 		}
-
-		createWall(new THREE.Vector3(+0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
-		createWall(new THREE.Vector3(-0.5, 0.5, -10.5), new THREE.Vector3(0, 0, 0));
-
-		createWall(new THREE.Vector3(+0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
-		createWall(new THREE.Vector3(-0.5, 0.5, 10.5), new THREE.Vector3(0, Math.PI, 0));
-
-		/*
-      const loader = new THREE.OBJLoader();
-      // テクスチャーのパスを指定
-      //loader.setPath('models/3ds/portalgun/textures/');
-      // 3dsファイルのパスを指定
-      loader.load('obj/interior.obj',  (object) => {
-        // 読み込み後に3D空間に追加
-        scene.add(object);
-      });
-			*/
-
-		/*
-			var mtlLoader = new THREE.MTLLoader();
-    	mtlLoader.setPath( './obj/' );              // this/is/obj/path/
-    	mtlLoader.load( 'cat/cat.mtl', function( materials ) {
-      	materials.preload();
-      	var objLoader = new THREE.OBJLoader();
-      	objLoader.setMaterials( materials );
-      	objLoader.setPath( './obj/' );            // this/is/obj/path/
-      	objLoader.load( 'cat/cat.obj', function ( object ) {
-        objmodel = object.clone();
-        objmodel.scale.set(10, 10, 10);      // 縮尺の初期化
-        objmodel.rotation.set(0, 0, 0);         // 角度の初期化
-        objmodel.position.set(0, 0, 0);         // 位置の初期化
-
-    // objをObject3Dで包む
-        obj = new THREE.Object3D();
-        obj.add(objmodel);
-
-        scene.add(obj);                         // sceneに追加
-      }, onProgress, onError );
-    });
-		*/
-
-		function onProgress() {
-
-		}
-
-		function onError() {
-
-		}
-
-		//var grounds = [];
 
 		function createPlane(position, light) {
 
 			var loader = new THREE.TextureLoader();
 
 			loader.load("image/wood.jpg", function(texture) {
-				apply(texture); // mesh作成
+				apply(texture);
 			});
 
 			function apply(texture) {
@@ -167,22 +135,16 @@
 				plane.scale.x = 1;
 				plane.scale.y = 1;
 				plane.rotation.x = Math.PI / -2;
-				//plane.rotation.z = Math.PI / -2;
-				//var position = new THREE.Vector3(1, 0, 0);
 				plane.position.copy(position);
 				scene.add(plane);
-
-				//grounds.push(plane);
-
 			}
 		}
 
 		function createCeiling(position, light) {
-
 			var loader = new THREE.TextureLoader();
 
 			loader.load("image/concrete.png", function(texture) {
-				apply(texture); // mesh作成
+				apply(texture);
 			});
 
 			function apply(texture) {
@@ -195,31 +157,16 @@
 				plane.scale.x = 1;
 				plane.scale.y = 1;
 				plane.rotation.x = Math.PI / 2;
-				//plane.rotation.z = Math.PI / -2;
-				//var position = new THREE.Vector3(1, 0, 0);
 				plane.position.copy(position);
 				scene.add(plane);
-
-				/*
-				if (light) {
-					var pointLight = new THREE.PointLight(0xFFFFFF, 0.15, 30, 2.0);
-					pointLight.position.x = position.x;
-					pointLight.position.z = position.z;
-					pointLight.position.y = 1.4;
-					scene.add(pointLight);
-				}
-				*/
-
 			}
 		}
 
-
 		function createWall(position, rotation, hasPicture) {
-
 			var loader = new THREE.TextureLoader();
 
 			loader.load((hasPicture) ? "image/lighted-wall.jpg" : "image/gray-wall.jpg", function(texture) {
-				apply(texture); // mesh作成
+				apply(texture);
 			});
 
 			function apply(texture) {
@@ -230,25 +177,18 @@
 				var plane = new THREE.Mesh(geometry, material);
 
 				plane.position.copy(position);
-				//plane.position.y = 0.75;
-				//plane.scale.y = 1.5;
 				plane.rotation.x = rotation.x;
 				plane.rotation.y = rotation.y;
 				plane.rotation.z = rotation.z;
 				scene.add(plane);
-
-				//targetList.push(plane);
 			}
 		}
 
-		var pictures = [];
-
 		function createPicture(position, rotation) {
-
 			var loader = new THREE.TextureLoader();
 
 			loader.load("image/art" + getRandomInt(0, 5) + ".jpg", function(texture) {
-				apply(texture); // mesh作成
+				apply(texture);
 			});
 
 			function apply(texture) {
@@ -265,7 +205,6 @@
 				plane.scale.y = 0.35;
 				plane.scale.z = 0.35;
 				plane.position.z = 0.021;
-
 				pictures.push(plane);
 
 				var boxGeometory = new THREE.BoxGeometry();
@@ -286,51 +225,23 @@
 
 				scene.add(container);
 
-				/*
-				var spotLight = new THREE.SpotLight(0xFFFFFF, 0.2, 30, Math.PI / 4, 1, 0.5);
-				spotLight.position.x = position.x/2;
-				spotLight.position.z = position.z;
-				spotLight.position.y = 1.2;
-				spotLight.target = container;
-				scene.add(spotLight);
-				*/
-
-				//const lightHelper = new THREE.SpotLightHelper(spotLight);
-				//scene.add(lightHelper);
-
-				//targetList.push(plane);
 			}
 		}
-
-		const canvas = document.getElementsByTagName("canvas")[0];
-		// マウス座標管理用のベクトルを作成
-		//const mouse = new THREE.Vector2();
-		// マウスイベントを登録
-		canvas.addEventListener('pointerup', handleMouseUp);
-		canvas.addEventListener('pointerdown', handleMouseDown);
-		canvas.addEventListener('pointermove', handleMouseMove);
 
 		function getMouseFromEvent(event) {
 			const mouse = new THREE.Vector2();
 			const element = event.currentTarget;
-			// canvas要素上のXY座標
 			const x = event.clientX - element.offsetLeft;
 			const y = event.clientY - element.offsetTop;
-			// canvas要素の幅・高さ
 			const w = element.offsetWidth;
 			const h = element.offsetHeight;
 
-			// -1〜+1の範囲で現在のマウス座標を登録する
 			mouse.x = (x / w) * 2 - 1;
 			mouse.y = -(y / h) * 2 + 1;
 
 			return mouse;
 		}
 
-		var lastMouse;
-		var down;
-		var move;
-		// マウスを動かしたときのイベント
 		function handleMouseDown(event) {
 			down = true;
 			move = false;
@@ -345,37 +256,24 @@
 
 				camera.rotation.y += d * 2;
 				lastMouse = mouse;
-				//down = false;
 				move = true;
 
 			}
 		}
 
-		var lastIntersect;
-
 		function handleMouseUp(event) {
-
-			//if (move == false) {
-
 			var mouse = getMouseFromEvent(event);
 
 			const raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera(mouse, camera);
-			//const intersects = raycaster.intersectObjects(scene.children);
+
 			const intersects = raycaster.intersectObjects(pictures);
 			if (intersects.length > 0) {
-				// ぶつかったオブジェクトに対してなんかする
-				//alert(intersects[0]);
-
 				var intersect = intersects[0].object;
-
-
 				if (intersect == lastIntersect)
 					return;
 
 				lastIntersect = intersect;
-
-				//alert(intercect);
 
 				let handVec = new THREE.Vector3()
 
@@ -387,20 +285,8 @@
 				var cy = camera.rotation.y;
 				var iy = (left ? -1 : 1) * Math.PI / 2;
 
-				/*
-					if(cy > Math.PI* 2){
-						cy -= Math.PI * 2;
-					}
-					else if(cy < -Math.PI* 2){
-						cy += Math.PI * 2;
-					}
-					*/
+				iy = findShort(cy, iy);
 
-				iy = FindShort(cy, iy);
-
-				console.log(cy + " " + iy);
-
-				//var ip = intercect.position;
 				var cp = camera.position;
 
 				var rate = 0;
@@ -420,42 +306,10 @@
 					duration: 1,
 					y: iy
 				});
-				/*
-				gsap.to(dummy, {
-					duration: 1,
-					rotation: { y:iy + "_short", useRadians:true},
-					onUpdate: () => {
-						camera.rotation.y = 0;
-						console.log(dummy.rotation.y)
-					}
-				});
-				*/
-				//onUpdate: () => console.log(item.rotation.x, item.rotation.y, item.rotation.z)
-				/*
-				var moveToThere = function() {
-					rate += 0.01;
-
-					var rrate = rate * 2;
-					if(rrate > 1) rrate = 1;
-
-					if (rate < 1) {
-						requestAnimationFrame(moveToThere);
-					}
-					camera.position.x = ip.x * rate + cp.x * (1 - rate);
-					camera.position.z = ip.z * rate + cp.z * (1 - rate);
-					camera.rotation.y = iy * rrate + cy  * (1 - rrate);
-
-					renderer.render(scene, camera);
-				};
-
-				moveToThere();
-				*/
 			}
-			//}
 
 			down = false;
 			move = false;
-			//alert("aaa");
 		}
 
 		function getRandomInt(min, max) {
@@ -464,25 +318,7 @@
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
 
-		//$(window).on('touchmove.noScroll', function(e) {
-		//e.preventDefault();
-		//alert("no scroll");
-		//});
-
-		var preventScroll = function(event) {
-			event.preventDefault();
-		}
-
-		// スクロール停止の処理
-		window.addEventListener('touchmove', preventScroll, {
-			passive: false
-		});
-		canvas.addEventListener('pointermove.noScroll', preventScroll, {
-			passive: false
-		});
-
-
-		function FindShort(start, end) {
+		function findShort(start, end) {
 			var cap = Math.PI * 2;
 			var dif = end - start;
 			dif = dif % cap;
